@@ -1,5 +1,6 @@
 import playwright from "playwright";
 import * as dotenv from "dotenv";
+import { addNewReleases, AddResult } from "./db/releasesWriteRepo.js";
 dotenv.config();
 
 const DATA_URL = process.env.DATA_URL || "";
@@ -9,6 +10,13 @@ export interface Release {
   album: string;
   genre: string;
   year: number;
+}
+
+export interface ParseRequest {
+  profile: string;
+  tag: string;
+  fromPage: number;
+  toPage: number;
 }
 
 const getReleases = (tableRows: HTMLElement[]): Release[] => {
@@ -37,13 +45,18 @@ const getReleases = (tableRows: HTMLElement[]): Release[] => {
   return releases;
 };
 
-const parseAll = async (page: playwright.Page): Promise<Release[]> => {
+const parseAll = async (
+  page: playwright.Page,
+  url: string,
+  fromPage: number,
+  toPage: number
+): Promise<Release[]> => {
   let hasNextPage: boolean;
-  let currentPageNumber = 31;
+  let currentPageNumber = fromPage;
   const releaseChunks: Release[][] = [];
 
   do {
-    await page.goto(`${DATA_URL}/${currentPageNumber}`);
+    await page.goto(`${url}/${currentPageNumber}`);
 
     hasNextPage = (await page.$("a.navlinknext")) !== null;
 
@@ -56,25 +69,41 @@ const parseAll = async (page: playwright.Page): Promise<Release[]> => {
 
     releaseChunks.push(chunk);
 
-    await page.waitForTimeout(5000);
-  } while (hasNextPage);
+    await page.waitForTimeout(3000);
+  } while (hasNextPage && currentPageNumber <= toPage);
 
   const flattenedReleases = releaseChunks.flat();
 
   return flattenedReleases;
 };
 
-export const getRYMData = async (): Promise<Release[]> => {
+const getRYMData = async (
+  url: string,
+  fromPage: number,
+  toPage: number
+): Promise<Release[]> => {
   const browser = await playwright.chromium.launch({
     headless: true,
   });
 
   const page = await browser.newPage();
 
-  const releases = await parseAll(page);
+  const releases = await parseAll(page, url, fromPage, toPage);
 
   await page.waitForTimeout(1000);
   await browser.close();
 
   return releases;
+};
+
+export const parseAndSave = async (
+  parseRequest: ParseRequest
+): Promise<AddResult> => {
+  const { profile, tag, fromPage, toPage } = parseRequest;
+  const url = `${DATA_URL}/${profile}/stag/${tag}`;
+  const releases = await getRYMData(url, fromPage, toPage);
+
+  const result = await addNewReleases(releases);
+
+  return result;
 };

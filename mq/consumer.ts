@@ -1,3 +1,5 @@
+import { ConsumeMessage } from "amqplib";
+import { parseAndSave } from "../parser.js";
 import { connectToRabbitMq } from "./amqp.js";
 
 export const startConsumer = async (): Promise<void> => {
@@ -10,15 +12,19 @@ export const startConsumer = async (): Promise<void> => {
   });
 
   const exchangeName = "parse-tasks-exchange";
-  await channel.assertExchange(exchangeName, "direct", { durable: true });
+  await channel.assertExchange(exchangeName, "direct", { durable: false });
 
   const { queue } = await channel.assertQueue("parse-tasks-queue");
   await channel.bindQueue(queue, exchangeName, "parse-tasks-key");
 
-  await channel.consume(queue, (msg) => {
-    if (msg !== null) {
-      console.log("Received message:", msg.content.toString());
-      channel.ack(msg);
+  await channel.consume(queue, async (message: ConsumeMessage | null) => {
+    if (message !== null) {
+      const json = message.content.toString();
+      const parseRequest = JSON.parse(json);
+      const result = await parseAndSave(parseRequest);
+
+      console.log(JSON.stringify(result));
+      channel.ack(message);
     } else {
       console.log("Error while receiving the message");
     }

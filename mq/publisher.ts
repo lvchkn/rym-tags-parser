@@ -18,7 +18,7 @@ export const publishMessage = async (message) => {
 
   try {
     const exchangeName = "parse-tasks-exchange";
-    await channel.assertExchange(exchangeName, "direct", { durable: true });
+    await channel.assertExchange(exchangeName, "direct", { durable: false });
 
     channel.publish(
       exchangeName,
