@@ -3,17 +3,12 @@ import { connectToMongoDb } from "./db/mongo.js";
 import { getAllReleases } from "./db/releasesReadRepo.js";
 import { publishMessage } from "./mq/publisher.js";
 import { startConsumer } from "./mq/consumer.js";
+import { ParseRequest } from "./parser.js";
 
 /* TODO: 
   1) Remove span class inner html;
   2) Add sort / filter APIs
 */
-
-interface ParseData {
-  profile: string;
-  fromPage: number;
-  toPage: number;
-}
 
 const app = express();
 const port = Number(process.env.PORT) || 3000;
@@ -31,7 +26,7 @@ const getData = async (req: Request, res: Response) => {
 
 const postData = async (req: Request, res: Response) => {
   const body = req.body;
-  const parseData: ParseData = body;
+  const parseData: ParseRequest = body;
   const result = await publishMessage(parseData);
   res.status(202).json(result);
 };
