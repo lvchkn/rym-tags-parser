@@ -1,29 +1,51 @@
 version: "3"
 services:
+  rym-tags-parser:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rym-tags-parser
+    env_file: .env
+    environment:
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PW=${MONGO_PW}
+      - MONGO_CLUSTERURL=${MONGO_CLUSTERURL}
+      - DATA_URL=${DATA_URL}
+      - RMQ_HOST=${RMQ_HOST}
+      - SERVICE_URL=${SERVICE_URL}
+    ports:
+      - "3000:3000"
+    restart: on-failure
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
   rabbitmq:
     image: rabbitmq:management-alpine
     hostname: rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 20s
+      timeout: 20s
+      retries: 5
   mongodb:
-    image: mongo:latest
+    image: mongo
     ports:
       - "27017:27017"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/rymdata --quiet
+      interval: 20s
+      timeout: 20s
+      retries: 5
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PW}
     restart: unless-stopped
     volumes:
       - rym-tags-mongodata:/data/db
-  mongoexpress:
-    image: mongo-express:latest
-    ports:
-      - "8084:8081"
-    environment:
-      - ME_CONFIG_MONGODB_URL="mongodb://${MONGO_USER}:${MONGO_PW}@mongodb:27017"
-    restart: always
-    depends_on:
-      - mongodb
 volumes:
   rym-tags-mongodata:
