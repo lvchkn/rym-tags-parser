@@ -1,6 +1,4 @@
 import amqplib, { Connection } from "amqplib";
-import * as dotenv from "dotenv";
-dotenv.config();
 
 const host = process.env.RMQ_HOST;
 
