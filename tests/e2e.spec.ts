@@ -27,10 +27,10 @@ test("parse-check_status-get_releases-flow", async ({ request }) => {
 
   const parseResult = await request.post(`/parse`, {
     data: {
-      profile: "CaptainCat",
-      tag: "1nteresting+metal",
-      fromPage: 30,
-      toPage: 30,
+      profile: process.env.PROFILE,
+      tag: process.env.TAG,
+      fromPage: process.env.FROM_PAGE,
+      toPage: process.env.TAG,
     },
   });
 
@@ -46,7 +46,7 @@ test("parse-check_status-get_releases-flow", async ({ request }) => {
   await expect(async () => {
     const response = await request.get(`/tasks/${parseResultJson.id}`);
     const json = await response.json();
-    console.log("FROM TEST!!!", json);
+
     expect(json.status).toBe("Completed");
   }).toPass({
     intervals: [5_000, 5_000, 5_000],
@@ -59,7 +59,7 @@ test("parse-check_status-get_releases-flow", async ({ request }) => {
   expect(releases.status()).toBe(200);
 
   const res = await releases.json();
-  console.log(JSON.stringify(res));
+  console.log(`${res.length} releases retrieved`);
 });
 
 test.afterAll(async () => {
