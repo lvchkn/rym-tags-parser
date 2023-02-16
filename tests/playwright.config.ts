@@ -1,4 +1,5 @@
 import { defineConfig } from "@playwright/test";
+import "../config.js";
 
 export default defineConfig({
   use: {

@@ -5,9 +5,11 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "tsc && NODE_ENV=development node dist/server.js",
-    "test:debug": "DEBUG=pw:browser* npx playwright test --config=tests/playwright.config.ts",
-    "test": "NODE_ENV=testing npx playwright test --config=tests/playwright.config.ts"
+    "build": "tsc",
+    "start:dev": "tsc && NODE_ENV=development node dist/server.js",
+    "start:test": "tsc && NODE_ENV=test node dist/server.js",
+    "test:debug": "NODE_ENV=test DEBUG=pw:browser* npx playwright test --config=tests/playwright.config.ts",
+    "test": "NODE_ENV=test npx playwright test --config=tests/playwright.config.ts"
   },
   "keywords": [],
   "author": "",

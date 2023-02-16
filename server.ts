@@ -9,12 +9,10 @@ import morgan from "morgan";
 /* TODO: 
   1) Remove span class inner html;
   2) Add sort / filter APIs
-  3) Reduce docker image size
-  4) Add compose overrides for dev/test envs
 */
 
 const app: Express = express();
-const port = Number(process.env.PORT) || 3000;
+const port = process.env.PORT || 3000;
 const loggerFormat =
   process.env.NODE_ENV === "development" ? "dev" : "combined";
 
