@@ -49,8 +49,8 @@ test("parse-check_status-get_releases-flow", async ({ request }) => {
 
     expect(json.status).toBe("Completed");
   }).toPass({
-    intervals: [5_000, 10_000, 15_000],
-    timeout: 90_000,
+    intervals: [5_000],
+    timeout: 50_000,
   });
 
   const releases = await request.get(`/`);
