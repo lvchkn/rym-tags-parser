@@ -1,4 +1,5 @@
 import { ConsumeMessage } from "amqplib";
+import { Task, upsertTask } from "../db/tasksRepo.js";
 import { parseAndSave } from "../parser.js";
 import { connectToRabbitMq } from "./amqp.js";
 
@@ -25,6 +26,17 @@ export const startConsumer = async (): Promise<void> => {
 
       console.log(JSON.stringify(result));
       channel.ack(message);
+
+      const task: Task = {
+        id: message.properties.messageId,
+        status: "Completed",
+      };
+
+      const upsertTaskResult = await upsertTask(task);
+      console.log(
+        "upsertTaskResult completed:",
+        JSON.stringify(upsertTaskResult)
+      );
     } else {
       console.log("Error while receiving the message");
     }

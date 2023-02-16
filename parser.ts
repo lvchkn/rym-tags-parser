@@ -1,7 +1,5 @@
 import playwright from "playwright";
-import * as dotenv from "dotenv";
 import { addNewReleases, AddResult } from "./db/releasesWriteRepo.js";
-dotenv.config();
 
 const DATA_URL = process.env.DATA_URL || "";
 
@@ -69,7 +67,7 @@ const parseAll = async (
 
     releaseChunks.push(chunk);
 
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(5_000);
   } while (hasNextPage && currentPageNumber <= toPage);
 
   const flattenedReleases = releaseChunks.flat();
@@ -90,7 +88,7 @@ const getRYMData = async (
 
   const releases = await parseAll(page, url, fromPage, toPage);
 
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(1_000);
   await browser.close();
 
   return releases;

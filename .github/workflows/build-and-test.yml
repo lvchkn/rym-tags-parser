@@ -1,0 +1,48 @@
+name: build-and-test
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build app
+        run: npm run build
+
+      - name: Create .env.test file
+        run: |
+          touch .env.test
+
+          echo MONGO_PW=${{ secrets.MONGO_PW }} >> .env.test
+          echo MONGO_USER=${{ secrets.MONGO_USER }} >> .env.test
+          echo RMQ_HOST=${{ secrets.RMQ_HOST }} >> .env.test
+
+          echo MONGO_CLUSTERURL=${{ vars.MONGO_CLUSTERURL }} >> .env.test
+          echo DATA_URL=${{ vars.DATA_URL }} >> .env.test
+          echo SERVICE_URL=${{ vars.SERVICE_URL }} >> .env.test
+          echo PROFILE=${{ vars.PROFILE }} >> .env.test
+          echo TAG=${{ vars.TAG }} >> .env.test
+          echo FROM_PAGE=${{ vars.FROM_PAGE }} >> .env.test
+          echo TO_PAGE=${{ vars.TO_PAGE }} >> .env.test
+
+      - name: Run tests
+        run: npm run test

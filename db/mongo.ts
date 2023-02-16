@@ -1,12 +1,11 @@
 import { MongoClient } from "mongodb";
-import * as dotenv from "dotenv";
-dotenv.config();
 
 const user = process.env.MONGO_USER;
 const pw = process.env.MONGO_PW;
 const clusterUrl = process.env.MONGO_CLUSTERURL;
 
-const uri = `mongodb://${user}:${pw}@${clusterUrl}:27017?retryWrites=false&w=majority`;
+const uri = `mongodb://${user}:${pw}@${clusterUrl}`;
+
 const client = new MongoClient(uri);
 
 const connectToMongoDb = async () => {

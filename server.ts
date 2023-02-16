@@ -1,39 +1,26 @@
-import express, { Request, Response } from "express";
+import express, { Express } from "express";
+import "./config.js";
 import { connectToMongoDb } from "./db/mongo.js";
-import { getAllReleases } from "./db/releasesReadRepo.js";
-import { publishMessage } from "./mq/publisher.js";
 import { startConsumer } from "./mq/consumer.js";
-import { ParseRequest } from "./parser.js";
+import { rootRouter } from "./routers/rootRouter.js";
+import { tasksRouter } from "./routers/tasksRouter.js";
+import morgan from "morgan";
 
 /* TODO: 
   1) Remove span class inner html;
   2) Add sort / filter APIs
 */
 
-const app = express();
-const port = Number(process.env.PORT) || 3000;
+const app: Express = express();
+const port = process.env.PORT || 3000;
+const loggerFormat =
+  process.env.NODE_ENV === "development" ? "dev" : "combined";
 
 app.use(express.json());
+app.use(morgan(loggerFormat));
 
-const getData = async (req: Request, res: Response) => {
-  try {
-    const releases = await getAllReleases();
-    res.status(200).json(releases);
-  } catch (error) {
-    res.status(500).json(error);
-  }
-};
-
-const postData = async (req: Request, res: Response) => {
-  const body = req.body;
-  const parseData: ParseRequest = body;
-  const result = await publishMessage(parseData);
-  res.status(202).json(result);
-};
-
-app.get("/", getData);
-
-app.post("/parse", postData);
+app.use("/", rootRouter);
+app.use("/tasks", tasksRouter);
 
 (async () => {
   await connectToMongoDb();
