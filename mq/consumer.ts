@@ -21,6 +21,8 @@ export const startConsumer = async (): Promise<void> => {
   await channel.consume(queue, async (message: ConsumeMessage | null) => {
     if (message !== null) {
       const json = message.content.toString();
+      console.log("Message received!");
+
       const parseRequest = JSON.parse(json);
       const result = await parseAndSave(parseRequest);
 

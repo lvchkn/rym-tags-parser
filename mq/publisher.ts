@@ -30,6 +30,8 @@ export const publishMessage = async (message) => {
       { messageId: uuid }
     );
 
+    console.log("Message published!");
+
     const task: Task = {
       id: uuid,
       status: "pending",

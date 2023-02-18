@@ -10,6 +10,7 @@ let environment: StartedDockerComposeEnvironment;
 
 test.beforeAll(async () => {
   test.setTimeout(300_000);
+  console.log("Before all section in tests executing...");
 
   const composeFilePath = path.resolve(path.dirname("../"));
   const composeFile = "docker-compose.yml";
@@ -20,10 +21,13 @@ test.beforeAll(async () => {
     .withWaitStrategy("mongodb-1", Wait.forHealthCheck())
     .withStartupTimeout(180_000)
     .up();
+
+  console.log("Containers are up");
 });
 
 test("parse-check_status-get_releases-flow", async ({ request }) => {
   test.setTimeout(300_000);
+  console.log("Test started executing");
 
   const parseResult = await request.post(`/parse`, {
     data: {
@@ -33,6 +37,8 @@ test("parse-check_status-get_releases-flow", async ({ request }) => {
       toPage: process.env.TAG,
     },
   });
+
+  console.log("POST request sent");
 
   expect(parseResult.ok()).toBeTruthy();
   expect(parseResult.status()).toBe(202);

@@ -82,6 +82,10 @@ const getRYMData = async (
 ): Promise<Release[]> => {
   const browser = await playwright.chromium.launch({
     headless: true,
+    logger: {
+      isEnabled: (name, severity) => name === "browser",
+      log: (name, severity, message, args) => console.log(`${name} ${message}`),
+    },
   });
 
   const page = await browser.newPage();
