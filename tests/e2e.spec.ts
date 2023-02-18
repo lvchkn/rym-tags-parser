@@ -7,7 +7,7 @@ import path from "path";
 import { run } from "../server.js";
 
 let environment: StartedDockerComposeEnvironment;
-let port: number;
+let baseUrl: string;
 
 test.beforeAll(async () => {
   test.setTimeout(300_000);
@@ -19,7 +19,8 @@ test.beforeAll(async () => {
     .withBuild()
     .up();
 
-  port = Number(await run());
+  const port = Number(await run());
+  baseUrl = `http://localhost:${port}`;
   console.log(`Containers are up. Port is ${port}`);
 });
 
@@ -27,7 +28,7 @@ test("parse-check_status-get_releases-flow", async ({ request }) => {
   test.setTimeout(300_000);
   console.log("Test started executing");
 
-  const parseResult = await request.post(`http://localhost:${port}/parse`, {
+  const parseResult = await request.post(`${baseUrl}/parse`, {
     data: {
       profile: process.env.PROFILE,
       tag: process.env.TAG,
@@ -47,7 +48,7 @@ test("parse-check_status-get_releases-flow", async ({ request }) => {
 
   await expect(async () => {
     const response = await request.get(
-      `http://localhost:${port}/tasks/${parseResultJson.id}`
+      `${baseUrl}/tasks/${parseResultJson.id}`
     );
     const json = await response.json();
     console.log(`Task status: ${json.status}`);
@@ -58,7 +59,7 @@ test("parse-check_status-get_releases-flow", async ({ request }) => {
     timeout: 90_000,
   });
 
-  const releases = await request.get(`http://localhost:${port}/`);
+  const releases = await request.get(`${baseUrl}/`);
 
   expect(releases.ok()).toBeTruthy();
   expect(releases.status()).toBe(200);

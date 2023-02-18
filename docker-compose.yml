@@ -1,26 +1,5 @@
 version: "3"
 services:
-  # rym-tags-parser:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: rym-tags-parser
-  #   env_file: .env.test
-  #   environment:
-  #     - MONGO_USER=${MONGO_USER}
-  #     - MONGO_PW=${MONGO_PW}
-  #     - MONGO_CLUSTERURL=${MONGO_CLUSTERURL}
-  #     - DATA_URL=${DATA_URL}
-  #     - RMQ_HOST=${RMQ_HOST}
-  #     - SERVICE_URL=${SERVICE_URL}
-  #   ports:
-  #     - "3000:3000"
-  #   restart: on-failure
-  #   depends_on:
-  #     rabbitmq:
-  #       condition: service_healthy
-  #     mongodb:
-  #       condition: service_healthy
   rabbitmq:
     image: rabbitmq:management-alpine
     hostname: rabbitmq
