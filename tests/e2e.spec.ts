@@ -1,35 +1,33 @@
 import {
   DockerComposeEnvironment,
   StartedDockerComposeEnvironment,
-  Wait,
 } from "testcontainers";
 import test, { expect } from "@playwright/test";
 import path from "path";
+import { run } from "../server.js";
 
 let environment: StartedDockerComposeEnvironment;
+let port: number;
 
 test.beforeAll(async () => {
   test.setTimeout(300_000);
-  console.log("Before all section in tests executing...");
 
   const composeFilePath = path.resolve(path.dirname("../"));
   const composeFile = "docker-compose.yml";
 
   environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
     .withBuild()
-    .withWaitStrategy("rabbitmq-1", Wait.forHealthCheck())
-    .withWaitStrategy("mongodb-1", Wait.forHealthCheck())
-    .withStartupTimeout(180_000)
     .up();
 
-  console.log("Containers are up");
+  port = Number(await run());
+  console.log(`Containers are up. Port is ${port}`);
 });
 
 test("parse-check_status-get_releases-flow", async ({ request }) => {
   test.setTimeout(300_000);
   console.log("Test started executing");
 
-  const parseResult = await request.post(`/parse`, {
+  const parseResult = await request.post(`http://localhost:${port}/parse`, {
     data: {
       profile: process.env.PROFILE,
       tag: process.env.TAG,
@@ -37,8 +35,6 @@ test("parse-check_status-get_releases-flow", async ({ request }) => {
       toPage: process.env.TAG,
     },
   });
-
-  console.log("POST request sent");
 
   expect(parseResult.ok()).toBeTruthy();
   expect(parseResult.status()).toBe(202);
@@ -50,7 +46,9 @@ test("parse-check_status-get_releases-flow", async ({ request }) => {
   });
 
   await expect(async () => {
-    const response = await request.get(`/tasks/${parseResultJson.id}`);
+    const response = await request.get(
+      `http://localhost:${port}/tasks/${parseResultJson.id}`
+    );
     const json = await response.json();
     console.log(`Task status: ${json.status}`);
 
@@ -60,7 +58,7 @@ test("parse-check_status-get_releases-flow", async ({ request }) => {
     timeout: 90_000,
   });
 
-  const releases = await request.get(`/`);
+  const releases = await request.get(`http://localhost:${port}/`);
 
   expect(releases.ok()).toBeTruthy();
   expect(releases.status()).toBe(200);
