@@ -21,7 +21,7 @@ const getReleasesFromPage = async (
   page: playwright.Page
 ): Promise<Release[]> => {
   const locator = page.locator(".or_q_albumartist");
-  console.log("Visible: ", locator.isVisible());
+  //console.log("Visible: ", await locator.isVisible());
   const locatorsCount = await locator.count();
   console.log("locatorsCount", locatorsCount);
 
@@ -72,7 +72,8 @@ const parseAll = async (
 
   do {
     await page.goto(`${url}/${currentPageNumber}`);
-    await page.waitForTimeout(1_000);
+    //await page.waitForTimeout(1_000);
+    await page.waitForSelector(".or_q_albumartist");
 
     hasNextPage = (await page.$("a.navlinknext")) !== null;
 
