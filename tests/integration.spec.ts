@@ -22,6 +22,7 @@ test.beforeAll(async () => {
 
   const port = Number(await runServer());
   baseUrl = `http://localhost:${port}`;
+
   console.log(`Containers are up. Test server port is ${port}`);
 });
 
@@ -34,6 +35,7 @@ test("parse-check_status-get_releases-flow", async ({ request }) => {
       tag: process.env.TAG,
       fromPage: process.env.FROM_PAGE,
       toPage: process.env.TO_PAGE,
+      isTest: true,
     },
   });
 

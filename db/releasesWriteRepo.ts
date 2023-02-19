@@ -15,13 +15,19 @@ export const addNewReleases = async (
   releases: Release[]
 ): Promise<AddResult> => {
   try {
-    console.log("Releases retrieved:", releases.length);
     const bulkUpdate: AnyBulkWriteOperation<Release>[] = releases.map(
       (release) => {
         return {
           updateOne: {
             filter: { artist: release.artist, album: release.album },
-            update: { $set: release },
+            update: {
+              $setOnInsert: {
+                artist: release.artist,
+                album: release.album,
+                genres: release.genres,
+                year: release.year,
+              },
+            },
             upsert: true,
           },
         };

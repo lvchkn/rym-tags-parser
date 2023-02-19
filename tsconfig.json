@@ -25,6 +25,7 @@
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": false,
     "allowUnreachableCode": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "resolveJsonModule": true
   }
 }
