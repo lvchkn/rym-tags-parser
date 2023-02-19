@@ -21,12 +21,12 @@ const getReleases = (tableRows: HTMLElement[]): Release[] => {
   const releases: Release[] = [];
 
   tableRows.forEach((row) => {
-    const artist = row.querySelector(".artist")?.innerHTML || "";
-    const album = row.querySelector(".album")?.innerHTML || "";
-    const genre = row.querySelector(".genre")?.innerHTML || "";
+    const artist = row.querySelector(".artist")?.textContent || "";
+    const album = row.querySelector(".album")?.textContent || "";
+    const genre = row.querySelector(".genre")?.textContent || "";
 
     const yearWithParentheses =
-      row.querySelector("span.smallgray")?.innerHTML || "";
+      row.querySelector("span.smallgray")?.textContent || "";
 
     const yearString = yearWithParentheses.replace("(", "").replace(")", "");
 
