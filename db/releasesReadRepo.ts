@@ -1,23 +1,24 @@
-import { WithId } from "mongodb";
+import { Filter, WithId } from "mongodb";
 import { Release } from "../parser.js";
+import { FilterOptions } from "../routers/releasesRouter.js";
 import { getClient } from "./mongo.js";
 
 const client = getClient();
 const db = client.db("rymdata");
 
-export const getAllReleases = async (): Promise<WithId<Release>[]> => {
-  const releasesCursor = db.collection<Release>("releases").find();
+export const getAllReleases = async (
+  filterOptions: FilterOptions
+): Promise<WithId<Release>[]> => {
+  const releasesCursor = db.collection<Release>("releases").find(filterOptions);
   const releases = releasesCursor.toArray();
 
   return releases;
 };
 
 export const getReleaseByAlbumName = async (
-  name: string
+  album: string
 ): Promise<WithId<Release>> => {
-  const release = await db
-    .collection<Release>("releases")
-    .findOne({ name: name });
+  const release = await db.collection<Release>("releases").findOne({ album });
 
   if (release) return release;
 
@@ -27,9 +28,7 @@ export const getReleaseByAlbumName = async (
 export const getAllReleasesInGenre = async (
   genre: string
 ): Promise<WithId<Release>[]> => {
-  const releasesCursor = db
-    .collection<Release>("releases")
-    .find({ genre: genre });
+  const releasesCursor = db.collection<Release>("releases").find({ genre });
 
   const releases = releasesCursor.toArray();
 
@@ -39,9 +38,7 @@ export const getAllReleasesInGenre = async (
 export const getAllReleasesInYear = async (
   year: Number
 ): Promise<WithId<Release>[]> => {
-  const releasesCursor = db
-    .collection<Release>("releases")
-    .find({ year: year });
+  const releasesCursor = db.collection<Release>("releases").find({ year });
 
   const releases = releasesCursor.toArray();
 
@@ -51,9 +48,7 @@ export const getAllReleasesInYear = async (
 export const getAllAlbumsByArtist = async (
   artist: string
 ): Promise<WithId<Release>[]> => {
-  const releasesCursor = db
-    .collection<Release>("releases")
-    .find({ artist: artist });
+  const releasesCursor = db.collection<Release>("releases").find({ artist });
 
   const releases = releasesCursor.toArray();
 

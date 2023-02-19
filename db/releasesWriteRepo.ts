@@ -1,3 +1,4 @@
+import { AnyBulkWriteOperation } from "mongodb";
 import { Release } from "../parser.js";
 import { getClient } from "./mongo.js";
 
@@ -6,26 +7,41 @@ const db = client.db("rymdata");
 
 export interface AddResult {
   ack: boolean;
-  count: number;
+  insertedCount: number;
+  upsertedCount: number;
 }
 
 export const addNewReleases = async (
   releases: Release[]
 ): Promise<AddResult> => {
   try {
+    const bulkUpdate: AnyBulkWriteOperation<Release>[] = releases.map(
+      (release) => {
+        return {
+          updateOne: {
+            filter: { artist: release.artist, album: release.album },
+            update: { $set: release },
+            upsert: true,
+          },
+        };
+      }
+    );
+
     const result = await db
       .collection<Release>("releases")
-      .insertMany(releases, { ordered: false });
+      .bulkWrite(bulkUpdate);
 
     return {
-      ack: result.acknowledged,
-      count: result.insertedCount,
+      ack: result.isOk(),
+      insertedCount: result.insertedCount,
+      upsertedCount: result.upsertedCount,
     };
   } catch (error: any) {
     console.error(error);
     return {
       ack: false,
-      count: error.result.result.insertedCount,
+      insertedCount: error?.result?.result?.insertedCount,
+      upsertedCount: error?.result?.result?.upsertedCount,
     };
   }
 };
