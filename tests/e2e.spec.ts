@@ -68,6 +68,20 @@ test("parse-check_status-get_releases-flow", async ({ request }) => {
   console.log(`${res.length} releases retrieved`);
 });
 
+test.afterEach(async ({ page }, testInfo) => {
+  if (testInfo.status !== testInfo.expectedStatus) {
+    const screenshotPath = testInfo.outputPath(`failure.png`);
+
+    testInfo.attachments.push({
+      name: "screenshot",
+      path: screenshotPath,
+      contentType: "image/png",
+    });
+
+    await page.screenshot({ path: screenshotPath, timeout: 5_000 });
+  }
+});
+
 test.afterAll(async () => {
   await stopServer();
   await environment.down();

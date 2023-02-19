@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "start": "tsc && NODE_ENV=development node dist/server.js",
-    "test": "NODE_ENV=test npx playwright test --config=tests/playwright.config.ts"
+    "test": "NODE_ENV=test DEBUG=pw:api,pw:browser npx playwright test --config=tests/playwright.config.ts"
   },
   "keywords": [],
   "author": "",
