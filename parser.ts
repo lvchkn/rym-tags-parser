@@ -52,11 +52,10 @@ const parseAll = async (
   let hasNextPage: boolean;
   let currentPageNumber = fromPage;
   const releaseChunks: Release[][] = [];
-  console.log("ParseAll Log", `${url}/${currentPageNumber}`);
 
   do {
     await page.goto(`${url}/${currentPageNumber}`);
-    await page.waitForTimeout(1_000);
+    await page.waitForTimeout(2_500);
 
     hasNextPage = (await page.$("a.navlinknext")) !== null;
 
