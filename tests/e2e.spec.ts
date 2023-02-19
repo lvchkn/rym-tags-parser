@@ -70,7 +70,7 @@ test("parse-check_status-get_releases-flow", async ({ request }) => {
 
 test.afterEach(async ({ page }, testInfo) => {
   if (testInfo.status !== testInfo.expectedStatus) {
-    const screenshotPath = testInfo.outputPath(`failure.png`);
+    const screenshotPath = `test-results/screenshot.png`;
 
     testInfo.attachments.push({
       name: "screenshot",
@@ -78,7 +78,7 @@ test.afterEach(async ({ page }, testInfo) => {
       contentType: "image/png",
     });
 
-    await page.screenshot({ path: screenshotPath, timeout: 5_000 });
+    console.log("Screenshot attached!");
   }
 });
 

@@ -21,7 +21,6 @@ const getReleasesFromPage = async (
   page: playwright.Page
 ): Promise<Release[]> => {
   const locator = page.locator(".or_q_albumartist");
-  //console.log("Visible: ", await locator.isVisible());
   const locatorsCount = await locator.count();
   console.log("locatorsCount", locatorsCount);
 
@@ -37,17 +36,14 @@ const getReleasesFromPage = async (
 
     const albumLocator = currentRelease.locator(".album");
     const album = (await albumLocator.textContent()) ?? "";
-    console.log("Current `Album`", album);
 
     const genreLocator = currentRelease.locator(".genre");
     const genres = await genreLocator.allTextContents();
-    console.log("Current Genres", genres);
 
     const yearLocator = currentRelease.locator("span.smallgray");
     const yearWithParentheses = (await yearLocator.textContent()) ?? "";
     const yearString = yearWithParentheses.replace("(", "").replace(")", "");
     const year = Number(yearString);
-    console.log("Current Year", year);
 
     releases.push({
       artist,
@@ -72,12 +68,17 @@ const parseAll = async (
 
   do {
     await page.goto(`${url}/${currentPageNumber}`);
-    //await page.waitForTimeout(1_000);
-    await page.waitForSelector(".or_q_albumartist");
+    await page.waitForLoadState("networkidle");
+    //await page.waitForSelector(".mbgen");
 
     hasNextPage = (await page.$("a.navlinknext")) !== null;
 
     if (hasNextPage) currentPageNumber++;
+
+    await page.screenshot({
+      path: "test-results/screenshot.png",
+      fullPage: true,
+    });
 
     const chunk: Release[] = await getReleasesFromPage(page);
     releaseChunks.push(chunk);
@@ -96,7 +97,7 @@ const getRYMData = async (
   toPage: number
 ): Promise<Release[]> => {
   const browser = await playwright.chromium.launch({
-    headless: true,
+    headless: false,
     logger: {
       isEnabled: (name, severity) => name === "browser",
       log: (name, severity, message, args) => console.log(`${name} ${message}`),
