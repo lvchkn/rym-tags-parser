@@ -1,4 +1,4 @@
-import { AnyBulkWriteOperation } from "mongodb";
+import { AnyBulkWriteOperation, BulkWriteResult } from "mongodb";
 import { Release } from "../parser.js";
 import { getClient } from "./mongo.js";
 
@@ -15,6 +15,7 @@ export const addNewReleases = async (
   releases: Release[]
 ): Promise<AddResult> => {
   try {
+    console.log("Releases retrieved", JSON.stringify(releases));
     const bulkUpdate: AnyBulkWriteOperation<Release>[] = releases.map(
       (release) => {
         return {
@@ -27,9 +28,11 @@ export const addNewReleases = async (
       }
     );
 
-    const result = await db
-      .collection<Release>("releases")
-      .bulkWrite(bulkUpdate);
+    let result = <BulkWriteResult>{};
+
+    if (bulkUpdate.length > 0) {
+      result = await db.collection<Release>("releases").bulkWrite(bulkUpdate);
+    }
 
     return {
       ack: result.isOk(),
