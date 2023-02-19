@@ -15,7 +15,7 @@ export const addNewReleases = async (
   releases: Release[]
 ): Promise<AddResult> => {
   try {
-    console.log("Releases retrieved", JSON.stringify(releases));
+    console.log("Releases retrieved:", releases.length);
     const bulkUpdate: AnyBulkWriteOperation<Release>[] = releases.map(
       (release) => {
         return {
