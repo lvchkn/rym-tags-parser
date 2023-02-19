@@ -4,7 +4,7 @@ import {
 } from "testcontainers";
 import test, { expect } from "@playwright/test";
 import path from "path";
-import { run } from "../server.js";
+import { runServer, stopServer } from "../server.js";
 
 let environment: StartedDockerComposeEnvironment;
 let baseUrl: string;
@@ -16,17 +16,17 @@ test.beforeAll(async () => {
   const composeFile = "docker-compose.yml";
 
   environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
+    .withNoRecreate()
     .withBuild()
     .up();
 
-  const port = Number(await run());
+  const port = Number(await runServer());
   baseUrl = `http://localhost:${port}`;
-  console.log(`Containers are up. Port is ${port}`);
+  console.log(`Containers are up. Test server port is ${port}`);
 });
 
 test("parse-check_status-get_releases-flow", async ({ request }) => {
   test.setTimeout(300_000);
-  console.log("Test started executing");
 
   const parseResult = await request.post(`${baseUrl}/parse`, {
     data: {
@@ -59,7 +59,7 @@ test("parse-check_status-get_releases-flow", async ({ request }) => {
     timeout: 90_000,
   });
 
-  const releases = await request.get(`${baseUrl}/`);
+  const releases = await request.get(`${baseUrl}/releases`);
 
   expect(releases.ok()).toBeTruthy();
   expect(releases.status()).toBe(200);
@@ -69,5 +69,6 @@ test("parse-check_status-get_releases-flow", async ({ request }) => {
 });
 
 test.afterAll(async () => {
+  await stopServer();
   await environment.down();
 });

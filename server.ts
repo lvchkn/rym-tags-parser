@@ -6,12 +6,10 @@ import { rootRouter } from "./routers/rootRouter.js";
 import { tasksRouter } from "./routers/tasksRouter.js";
 import morgan from "morgan";
 import { AddressInfo } from "net";
+import { releasesRouter } from "./routers/releasesRouter.js";
+import { IncomingMessage, Server, ServerResponse } from "http";
 
-/* TODO: 
-  1) Remove span class inner html;
-  2) Add sort / filter APIs
-*/
-
+let connection: Server<typeof IncomingMessage, typeof ServerResponse>;
 const app: Express = express();
 const port = process.env.PORT || 3000;
 const loggerFormat =
@@ -22,8 +20,9 @@ app.use(morgan(loggerFormat));
 
 app.use("/", rootRouter);
 app.use("/tasks", tasksRouter);
+app.use("/releases", releasesRouter);
 
-export async function run() {
+export async function runServer() {
   await connectToMongoDb();
   await startConsumer();
 
@@ -36,7 +35,7 @@ export async function run() {
       resolve(currentPort);
       return;
     } else {
-      const connection = app.listen(() => {
+      connection = app.listen(() => {
         currentPort = (<AddressInfo>connection.address()).port || port;
         console.log(`Test Server is listening on port ${currentPort}`);
         resolve(currentPort);
@@ -46,6 +45,14 @@ export async function run() {
   });
 }
 
+export async function stopServer(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    connection.close(() => {
+      resolve();
+    });
+  });
+}
+
 if (process.env.NODE_ENV !== "test") {
-  run();
+  runServer();
 }
