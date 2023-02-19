@@ -30,17 +30,21 @@ const getReleasesFromPage = async (
     const artistLocator = currentRelease.locator(".artist");
     // there may be more than 1 artist credited for a release
     const artist = (await artistLocator.allTextContents())[0] ?? "";
+    console.log("Current Artist", artist);
 
     const albumLocator = currentRelease.locator(".album");
     const album = (await albumLocator.textContent()) ?? "";
+    console.log("Current `Album`", album);
 
     const genreLocator = currentRelease.locator(".genre");
     const genres = await genreLocator.allTextContents();
+    console.log("Current Genres", genres);
 
     const yearLocator = currentRelease.locator("span.smallgray");
     const yearWithParentheses = (await yearLocator.textContent()) ?? "";
     const yearString = yearWithParentheses.replace("(", "").replace(")", "");
     const year = Number(yearString);
+    console.log("Current Year", year);
 
     releases.push({
       artist,
