@@ -21,7 +21,7 @@ export const addNewReleases = async (
           updateOne: {
             filter: { artist: release.artist, album: release.album },
             update: {
-              $set: {
+              $setOnInsert: {
                 artist: release.artist,
                 album: release.album,
                 genres: release.genres,
