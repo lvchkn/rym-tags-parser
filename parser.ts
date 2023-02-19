@@ -6,7 +6,7 @@ const DATA_URL = process.env.DATA_URL || "";
 export interface Release {
   artist: string;
   album: string;
-  genre: string;
+  genres: string[];
   year: number;
 }
 
@@ -17,28 +17,38 @@ export interface ParseRequest {
   toPage: number;
 }
 
-const getReleases = (tableRows: HTMLElement[]): Release[] => {
+const getReleasesFromPage = async (
+  page: playwright.Page
+): Promise<Release[]> => {
+  const locator = page.locator(".or_q_albumartist");
+  const locatorsCount = await locator.count();
   const releases: Release[] = [];
 
-  tableRows.forEach((row) => {
-    const artist = row.querySelector(".artist")?.textContent || "";
-    const album = row.querySelector(".album")?.textContent || "";
-    const genre = row.querySelector(".genre")?.textContent || "";
+  for (let i = 0; i < locatorsCount; i++) {
+    const currentRelease = locator.nth(i);
 
-    const yearWithParentheses =
-      row.querySelector("span.smallgray")?.textContent || "";
+    const artistLocator = currentRelease.locator(".artist");
+    // there may be more than 1 artist credited for a release
+    const artist = (await artistLocator.allTextContents())[0] ?? "";
 
+    const albumLocator = currentRelease.locator(".album");
+    const album = (await albumLocator.textContent()) ?? "";
+
+    const genreLocator = currentRelease.locator(".genre");
+    const genres = await genreLocator.allTextContents();
+
+    const yearLocator = currentRelease.locator("span.smallgray");
+    const yearWithParentheses = (await yearLocator.textContent()) ?? "";
     const yearString = yearWithParentheses.replace("(", "").replace(")", "");
-
     const year = Number(yearString);
 
     releases.push({
       artist,
       album,
-      genre,
+      genres,
       year,
     });
-  });
+  }
 
   return releases;
 };
@@ -55,16 +65,13 @@ const parseAll = async (
 
   do {
     await page.goto(`${url}/${currentPageNumber}`);
-    await page.waitForTimeout(2_500);
+    await page.waitForTimeout(1_000);
 
     hasNextPage = (await page.$("a.navlinknext")) !== null;
 
     if (hasNextPage) currentPageNumber++;
 
-    const locator = page.locator(".or_q_albumartist");
-
-    const chunk: Release[] = await locator.evaluateAll(getReleases);
-
+    const chunk: Release[] = await getReleasesFromPage(page);
     releaseChunks.push(chunk);
 
     await page.waitForTimeout(5_000);
@@ -89,7 +96,6 @@ const getRYMData = async (
   });
 
   const page = await browser.newPage();
-
   const releases = await parseAll(page, url, fromPage, toPage);
 
   await page.waitForTimeout(1_000);
