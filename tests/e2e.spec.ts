@@ -35,6 +35,7 @@ test("parse-check_status-get_releases-flow", async ({ request }) => {
       tag: process.env.TAG,
       fromPage: process.env.FROM_PAGE,
       toPage: process.env.TO_PAGE,
+      isTest: true,
     },
   });
 

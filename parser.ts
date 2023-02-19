@@ -1,5 +1,6 @@
 import playwright from "playwright";
 import { addNewReleases, AddResult } from "./db/releasesWriteRepo.js";
+import testReleases from "./testData.json" assert { type: "json" };
 
 const DATA_URL = process.env.DATA_URL || "";
 
@@ -15,6 +16,7 @@ export interface ParseRequest {
   tag: string;
   fromPage: number;
   toPage: number;
+  isTest?: boolean;
 }
 
 const getReleasesFromPage = async (
@@ -110,7 +112,13 @@ const getRYMData = async (
 export const parseAndSave = async (
   parseRequest: ParseRequest
 ): Promise<AddResult> => {
-  const { profile, tag, fromPage, toPage } = parseRequest;
+  const { profile, tag, fromPage, toPage, isTest } = parseRequest;
+
+  if (isTest) {
+    const result = await addNewReleases(testReleases);
+    return result;
+  }
+
   const url = `${DATA_URL}/${profile}/stag/${tag}`;
   const releases = await getRYMData(url, fromPage, toPage);
 
