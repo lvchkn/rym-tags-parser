@@ -21,7 +21,10 @@ const getReleasesFromPage = async (
   page: playwright.Page
 ): Promise<Release[]> => {
   const locator = page.locator(".or_q_albumartist");
+  console.log("Visible: ", locator.isVisible());
   const locatorsCount = await locator.count();
+  console.log("locatorsCount", locatorsCount);
+
   const releases: Release[] = [];
 
   for (let i = 0; i < locatorsCount; i++) {
