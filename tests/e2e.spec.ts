@@ -33,7 +33,7 @@ test("parse-check_status-get_releases-flow", async ({ request }) => {
       profile: process.env.PROFILE,
       tag: process.env.TAG,
       fromPage: process.env.FROM_PAGE,
-      toPage: process.env.TAG,
+      toPage: process.env.TO_PAGE,
     },
   });
 
