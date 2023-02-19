@@ -19,7 +19,6 @@ export interface ParseRequest {
 
 const getReleases = (tableRows: HTMLElement[]): Release[] => {
   const releases: Release[] = [];
-  console.log("getReleases callback");
 
   tableRows.forEach((row) => {
     const artist = row.querySelector(".artist")?.textContent || "";
@@ -32,7 +31,6 @@ const getReleases = (tableRows: HTMLElement[]): Release[] => {
     const yearString = yearWithParentheses.replace("(", "").replace(")", "");
 
     const year = Number(yearString);
-    console.log("pushing release...");
 
     releases.push({
       artist,
@@ -58,12 +56,14 @@ const parseAll = async (
 
   do {
     await page.goto(`${url}/${currentPageNumber}`);
+    await page.waitForTimeout(1_000);
 
     hasNextPage = (await page.$("a.navlinknext")) !== null;
 
     if (hasNextPage) currentPageNumber++;
 
     const locator = page.locator(".or_q_albumartist");
+
     const chunk: Release[] = await locator.evaluateAll(getReleases);
 
     releaseChunks.push(chunk);
