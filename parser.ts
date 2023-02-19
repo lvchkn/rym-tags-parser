@@ -63,10 +63,8 @@ const parseAll = async (
 
     if (hasNextPage) currentPageNumber++;
 
-    const chunk: Release[] = await page.$$eval(
-      ".or_q_albumartist",
-      getReleases
-    );
+    const locator = page.locator(".or_q_albumartist");
+    const chunk: Release[] = await locator.evaluateAll(getReleases);
 
     releaseChunks.push(chunk);
 
