@@ -68,17 +68,11 @@ const parseAll = async (
 
   do {
     await page.goto(`${url}/${currentPageNumber}`);
-    await page.waitForLoadState("networkidle");
-    //await page.waitForSelector(".mbgen");
+    await page.waitForSelector(".mbgen");
 
     hasNextPage = (await page.$("a.navlinknext")) !== null;
 
     if (hasNextPage) currentPageNumber++;
-
-    await page.screenshot({
-      path: "test-results/screenshot.png",
-      fullPage: true,
-    });
 
     const chunk: Release[] = await getReleasesFromPage(page);
     releaseChunks.push(chunk);

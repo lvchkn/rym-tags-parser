@@ -10,8 +10,10 @@ import { releasesRouter } from "./routers/releasesRouter.js";
 import { IncomingMessage, Server, ServerResponse } from "http";
 
 let connection: Server<typeof IncomingMessage, typeof ServerResponse>;
+
 const app: Express = express();
 const port = process.env.PORT || 3000;
+
 const loggerFormat =
   process.env.NODE_ENV === "development" ? "dev" : "combined";
 

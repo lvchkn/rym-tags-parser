@@ -22,6 +22,7 @@ test.beforeAll(async () => {
 
   const port = Number(await runServer());
   baseUrl = `http://localhost:${port}`;
+
   console.log(`Containers are up. Test server port is ${port}`);
 });
 
@@ -66,20 +67,6 @@ test("parse-check_status-get_releases-flow", async ({ request }) => {
 
   const res = await releases.json();
   console.log(`${res.length} releases retrieved`);
-});
-
-test.afterEach(async ({ page }, testInfo) => {
-  if (testInfo.status !== testInfo.expectedStatus) {
-    const screenshotPath = `test-results/screenshot.png`;
-
-    testInfo.attachments.push({
-      name: "screenshot",
-      path: screenshotPath,
-      contentType: "image/png",
-    });
-
-    console.log("Screenshot attached!");
-  }
 });
 
 test.afterAll(async () => {
