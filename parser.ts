@@ -1,6 +1,6 @@
 import playwright from "playwright";
 import { addNewReleases, AddResult } from "./db/releasesWriteRepo.js";
-import testReleases from "./testData.json" assert { type: "json" };
+import { testReleases } from "./testData.js";
 
 const DATA_URL = process.env.DATA_URL || "";
 
