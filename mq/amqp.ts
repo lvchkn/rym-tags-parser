@@ -2,7 +2,7 @@ import amqplib, { Connection } from "amqplib";
 
 const host = process.env.RMQ_HOST;
 
-export const connectToRabbitMq = async (): Promise<Connection> => {
+export async function connectToRabbitMq(): Promise<Connection> {
   try {
     const connection = await amqplib.connect(`amqp://${host}`);
     console.log("Successfully connected to RabbitMQ!");
@@ -10,4 +10,4 @@ export const connectToRabbitMq = async (): Promise<Connection> => {
   } catch (error) {
     throw ("Error occured while connecting to RabbitMQ!", error);
   }
-};
+}

@@ -3,28 +3,31 @@ import { getClient } from "./mongo.js";
 
 const client = getClient();
 const db = client.db("rymdata");
+const tasksCollectionName = "tasks";
 
 export interface Task {
   id: string;
   status: string;
 }
 
-export const getTask = async (taskId: string): Promise<WithId<Task>> => {
-  const task = await db.collection<Task>("tasks").findOne({ id: taskId });
+export async function getTask(taskId: string): Promise<WithId<Task>> {
+  const task = await db
+    .collection<Task>(tasksCollectionName)
+    .findOne({ id: taskId });
 
   if (task) return task;
 
   throw "Task with this id is not found";
-};
+}
 
-export const upsertTask = async (task: Task) => {
+export async function upsertTask(task: Task) {
   const filter = { id: task.id };
   const update = { $set: { id: task.id, status: task.status } };
   const options = { upsert: true };
 
   try {
     const result = await db
-      .collection<Task>("tasks")
+      .collection<Task>(tasksCollectionName)
       .updateOne(filter, update, options);
 
     return {
@@ -40,4 +43,4 @@ export const upsertTask = async (task: Task) => {
       upsertedCount: 0,
     };
   }
-};
+}
