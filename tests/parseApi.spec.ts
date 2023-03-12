@@ -7,7 +7,9 @@ test.beforeAll(async () => {
   baseUrl = `http://localhost:${Number(await runServer())}`;
 });
 
-test("parse-check_status-get_releases-flow", async ({ request }) => {
+test("run new parse task, then check task's status, then get all parsed releases", async ({
+  request,
+}) => {
   test.setTimeout(300_000);
 
   const parseResult = await request.post(`${baseUrl}/parse`, {
