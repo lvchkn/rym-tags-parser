@@ -9,12 +9,16 @@ const db = client.db("rymdata");
 const parseFilters = (filterOptions: FilterOptions): Filter<Release> => {
   let filter: Filter<Release> = {};
 
-  if (filterOptions.artist) {
-    filter.artist = filterOptions.artist;
+  if (filterOptions.artists) {
+    filter.artist = {
+      $in: filterOptions.artists,
+    };
   }
 
-  if (filterOptions.album) {
-    filter.album = filterOptions.album;
+  if (filterOptions.albums) {
+    filter.album = {
+      $in: filterOptions.albums,
+    };
   }
 
   if (filterOptions.genres) {
@@ -23,8 +27,10 @@ const parseFilters = (filterOptions: FilterOptions): Filter<Release> => {
     };
   }
 
-  if (filterOptions.year) {
-    filter.year = filterOptions.year;
+  if (filterOptions.years) {
+    filter.year = {
+      $in: filterOptions.years,
+    };
   }
 
   return filter;
