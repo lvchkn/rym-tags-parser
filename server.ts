@@ -1,13 +1,14 @@
 import express, { Express } from "express";
-import "./config.js";
+import morgan from "morgan";
+import { AddressInfo } from "net";
+import { IncomingMessage, Server, ServerResponse } from "http";
+import * as dotenv from "dotenv-flow";
+dotenv.config();
 import { connectToMongoDb } from "./db/mongo.js";
 import { startConsumer } from "./mq/consumer.js";
 import { rootRouter } from "./routers/rootRouter.js";
 import { tasksRouter } from "./routers/tasksRouter.js";
-import morgan from "morgan";
-import { AddressInfo } from "net";
 import { releasesRouter } from "./routers/releasesRouter.js";
-import { IncomingMessage, Server, ServerResponse } from "http";
 
 let connection: Server<typeof IncomingMessage, typeof ServerResponse>;
 

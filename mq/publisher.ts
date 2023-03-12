@@ -11,7 +11,7 @@ process.on("SIGINT", async () => {
   exit();
 });
 
-export const publishMessage = async (message) => {
+export async function publishMessage(message) {
   if (!connection) {
     connection = await connectToRabbitMq();
   }
@@ -44,4 +44,4 @@ export const publishMessage = async (message) => {
   } finally {
     await channel.close();
   }
-};
+}

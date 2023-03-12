@@ -4,6 +4,7 @@ import { getClient } from "./mongo.js";
 
 const client = getClient();
 const db = client.db("rymdata");
+const releasesCollectionName = "releases";
 
 export interface AddResult {
   ack: boolean;
@@ -11,9 +12,7 @@ export interface AddResult {
   upsertedCount: number;
 }
 
-export const addNewReleases = async (
-  releases: Release[]
-): Promise<AddResult> => {
+export async function addNewReleases(releases: Release[]): Promise<AddResult> {
   try {
     const bulkUpdate: AnyBulkWriteOperation<Release>[] = releases.map(
       (release) => {
@@ -37,7 +36,9 @@ export const addNewReleases = async (
     let result = <BulkWriteResult>{};
 
     if (bulkUpdate.length > 0) {
-      result = await db.collection<Release>("releases").bulkWrite(bulkUpdate);
+      result = await db
+        .collection<Release>(releasesCollectionName)
+        .bulkWrite(bulkUpdate);
     }
 
     return {
@@ -47,10 +48,11 @@ export const addNewReleases = async (
     };
   } catch (error: any) {
     console.error(error);
+
     return {
       ack: false,
       insertedCount: error?.result?.result?.insertedCount,
       upsertedCount: error?.result?.result?.upsertedCount,
     };
   }
-};
+}

@@ -1,6 +1,6 @@
 import playwright from "playwright";
 import { addNewReleases, AddResult } from "./db/releasesWriteRepo.js";
-import testReleases from "./testData.json" assert { type: "json" };
+import { testReleases } from "./testData.js";
 
 const DATA_URL = process.env.DATA_URL || "";
 
@@ -19,12 +19,9 @@ export interface ParseRequest {
   isTest?: boolean;
 }
 
-const getReleasesFromPage = async (
-  page: playwright.Page
-): Promise<Release[]> => {
+async function getReleasesFromPage(page: playwright.Page): Promise<Release[]> {
   const locator = page.locator(".or_q_albumartist");
   const locatorsCount = await locator.count();
-  console.log("locatorsCount", locatorsCount);
 
   const releases: Release[] = [];
 
@@ -34,7 +31,6 @@ const getReleasesFromPage = async (
     const artistLocator = currentRelease.locator(".artist");
     // there may be more than 1 artist credited for a release
     const artist = (await artistLocator.allTextContents())[0] ?? "";
-    console.log("Current Artist", artist);
 
     const albumLocator = currentRelease.locator(".album");
     const album = (await albumLocator.textContent()) ?? "";
@@ -56,14 +52,14 @@ const getReleasesFromPage = async (
   }
 
   return releases;
-};
+}
 
-const parseAll = async (
+async function parseAll(
   page: playwright.Page,
   url: string,
   fromPage: number,
   toPage: number
-): Promise<Release[]> => {
+): Promise<Release[]> {
   let hasNextPage: boolean;
   let currentPageNumber = fromPage;
   const releaseChunks: Release[][] = [];
@@ -85,13 +81,13 @@ const parseAll = async (
   const flattenedReleases = releaseChunks.flat();
 
   return flattenedReleases;
-};
+}
 
-const getRYMData = async (
+async function getRYMData(
   url: string,
   fromPage: number,
   toPage: number
-): Promise<Release[]> => {
+): Promise<Release[]> {
   const browser = await playwright.chromium.launch({
     headless: true,
     logger: {
@@ -107,11 +103,11 @@ const getRYMData = async (
   await browser.close();
 
   return releases;
-};
+}
 
-export const parseAndSave = async (
+export async function parseAndSave(
   parseRequest: ParseRequest
-): Promise<AddResult> => {
+): Promise<AddResult> {
   const { profile, tag, fromPage, toPage, isTest } = parseRequest;
 
   if (isTest) {
@@ -125,4 +121,4 @@ export const parseAndSave = async (
   const result = await addNewReleases(releases);
 
   return result;
-};
+}

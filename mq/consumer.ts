@@ -3,7 +3,7 @@ import { Task, upsertTask } from "../db/tasksRepo.js";
 import { parseAndSave } from "../parser.js";
 import { connectToRabbitMq } from "./amqp.js";
 
-export const startConsumer = async (): Promise<void> => {
+export async function startConsumer(): Promise<void> {
   const connection = await connectToRabbitMq();
   const channel = await connection.createChannel();
 
@@ -43,4 +43,4 @@ export const startConsumer = async (): Promise<void> => {
       console.log("Error while receiving the message");
     }
   });
-};
+}

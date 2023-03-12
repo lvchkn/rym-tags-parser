@@ -1,32 +1,15 @@
-import {
-  DockerComposeEnvironment,
-  StartedDockerComposeEnvironment,
-} from "testcontainers";
 import test, { expect } from "@playwright/test";
-import path from "path";
 import { runServer, stopServer } from "../server.js";
 
-let environment: StartedDockerComposeEnvironment;
 let baseUrl: string;
 
 test.beforeAll(async () => {
-  test.setTimeout(300_000);
-
-  const composeFilePath = path.resolve(path.dirname("../"));
-  const composeFile = "docker-compose.yml";
-
-  environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
-    .withNoRecreate()
-    .withBuild()
-    .up();
-
-  const port = Number(await runServer());
-  baseUrl = `http://localhost:${port}`;
-
-  console.log(`Containers are up. Test server port is ${port}`);
+  baseUrl = `http://localhost:${Number(await runServer())}`;
 });
 
-test("parse-check_status-get_releases-flow", async ({ request }) => {
+test("run new parse task, then check task's status, then get all parsed releases", async ({
+  request,
+}) => {
   test.setTimeout(300_000);
 
   const parseResult = await request.post(`${baseUrl}/parse`, {
@@ -72,5 +55,4 @@ test("parse-check_status-get_releases-flow", async ({ request }) => {
 
 test.afterAll(async () => {
   await stopServer();
-  await environment.down();
 });

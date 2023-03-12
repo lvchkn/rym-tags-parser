@@ -5,16 +5,21 @@ import { getClient } from "./mongo.js";
 
 const client = getClient();
 const db = client.db("rymdata");
+const releasesCollectionName = "releases";
 
-const parseFilters = (filterOptions: FilterOptions): Filter<Release> => {
+function parseFilters(filterOptions: FilterOptions): Filter<Release> {
   let filter: Filter<Release> = {};
 
-  if (filterOptions.artist) {
-    filter.artist = filterOptions.artist;
+  if (filterOptions.artists) {
+    filter.artist = {
+      $in: filterOptions.artists,
+    };
   }
 
-  if (filterOptions.album) {
-    filter.album = filterOptions.album;
+  if (filterOptions.albums) {
+    filter.album = {
+      $in: filterOptions.albums,
+    };
   }
 
   if (filterOptions.genres) {
@@ -23,62 +28,72 @@ const parseFilters = (filterOptions: FilterOptions): Filter<Release> => {
     };
   }
 
-  if (filterOptions.year) {
-    filter.year = filterOptions.year;
+  if (filterOptions.years) {
+    filter.year = {
+      $in: filterOptions.years,
+    };
   }
 
   return filter;
-};
+}
 
-export const getAllReleases = async (
+export async function getAllReleases(
   filterOptions: FilterOptions
-): Promise<WithId<Release>[]> => {
+): Promise<WithId<Release>[]> {
   const filters = parseFilters(filterOptions);
 
-  const releasesCursor = db.collection<Release>("releases").find(filters);
+  const releasesCursor = db
+    .collection<Release>(releasesCollectionName)
+    .find(filters);
   const releases = releasesCursor.toArray();
 
   return releases;
-};
+}
 
-export const getReleaseByAlbumName = async (
+export async function getReleaseByAlbumName(
   album: string
-): Promise<WithId<Release>> => {
-  const release = await db.collection<Release>("releases").findOne({ album });
+): Promise<WithId<Release>> {
+  const release = await db
+    .collection<Release>(releasesCollectionName)
+    .findOne({ album });
 
   if (release) return release;
 
   throw "Album with this name is not found";
-};
+}
 
-export const getAllReleasesInGenre = async (
+export async function getAllReleasesInGenre(
   genre: string
-): Promise<WithId<Release>[]> => {
+): Promise<WithId<Release>[]> {
   const releasesCursor = db
-    .collection<Release>("releases")
+    .collection<Release>(releasesCollectionName)
     .find({ genres: { $in: [genre] } });
 
   const releases = releasesCursor.toArray();
 
   return releases;
-};
+}
 
-export const getAllReleasesInYear = async (
+export async function getAllReleasesInYear(
   year: Number
-): Promise<WithId<Release>[]> => {
-  const releasesCursor = db.collection<Release>("releases").find({ year });
+): Promise<WithId<Release>[]> {
+  const releasesCursor = db
+    .collection<Release>(releasesCollectionName)
+    .find({ year });
 
   const releases = releasesCursor.toArray();
 
   return releases;
-};
+}
 
-export const getAllAlbumsByArtist = async (
+export async function getAllAlbumsByArtist(
   artist: string
-): Promise<WithId<Release>[]> => {
-  const releasesCursor = db.collection<Release>("releases").find({ artist });
+): Promise<WithId<Release>[]> {
+  const releasesCursor = db
+    .collection<Release>(releasesCollectionName)
+    .find({ artist });
 
   const releases = releasesCursor.toArray();
 
   return releases;
-};
+}

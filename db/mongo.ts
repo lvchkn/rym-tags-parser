@@ -8,7 +8,7 @@ const uri = `mongodb://${user}:${pw}@${clusterUrl}`;
 
 const client = new MongoClient(uri);
 
-export const connectToMongoDb = async () => {
+export async function connectToMongoDb() {
   try {
     await client.connect();
     console.log("Successfully connected to Mongo!");
@@ -16,6 +16,8 @@ export const connectToMongoDb = async () => {
     console.error("Error occurred while connecting to Mongo!", error);
     await client.close();
   }
-};
+}
 
-export const getClient = () => client;
+export function getClient() {
+  return client;
+}
