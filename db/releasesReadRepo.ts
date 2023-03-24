@@ -8,7 +8,7 @@ const db = client.db("rymdata");
 const releasesCollectionName = "releases";
 
 function parseFilters(filterOptions: FilterOptions): Filter<Release> {
-  let filter: Filter<Release> = {};
+  const filter: Filter<Release> = {};
 
   if (filterOptions.artists) {
     filter.artist = {
@@ -75,7 +75,7 @@ export async function getAllReleasesInGenre(
 }
 
 export async function getAllReleasesInYear(
-  year: Number
+  year: number
 ): Promise<WithId<Release>[]> {
   const releasesCursor = db
     .collection<Release>(releasesCollectionName)

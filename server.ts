@@ -30,7 +30,7 @@ export async function runServer() {
   await startConsumer();
 
   let currentPort = port;
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     if (process.env.NODE_ENV !== "test") {
       app.listen(port, () => {
         console.log(`Server is listening on port ${port}`);
@@ -49,7 +49,7 @@ export async function runServer() {
 }
 
 export async function stopServer(): Promise<void> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     connection.close(() => {
       resolve();
     });
