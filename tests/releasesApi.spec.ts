@@ -7,9 +7,43 @@ import { testReleases } from "../testData.js";
 let baseUrl: string;
 
 test.beforeAll(async () => {
-  baseUrl = `http://localhost:${Number(await runServer())}`;
+  const testServerPort = Number(await runServer());
+  baseUrl = `http://localhost:${testServerPort}`;
   await addNewReleases(testReleases);
 });
+
+test("the wrong query param is ignored", async ({ request }) => {
+  const response = await request.get(`${baseUrl}/releases?artist=Test`);
+  expect(response.status()).toBe(200);
+});
+
+test("when one of the query params is right and the other is wrong, the wrong one is ignored", async ({
+  request,
+}) => {
+  const response = await request.get(
+    `${baseUrl}/releases?artists=King Crimson&album=TestAlbum`
+  );
+  expect(response.status()).toBe(200);
+});
+
+test("when both query params are right, but one doesn't exist in the database, 404 is returned", async ({
+  request,
+}) => {
+  const response = await request.get(
+    `${baseUrl}/releases?artists=King Crimson&albums=TestAlbum`
+  );
+  expect(response.status()).toBe(404);
+});
+
+const wrongInputs = [null, undefined, ","];
+for (const input of wrongInputs) {
+  test(`when one of the query params is ${input}, 404 is returned`, async ({
+    request,
+  }) => {
+    const response = await request.get(`${baseUrl}/releases?artists=${input}`);
+    expect(response.status()).toBe(404);
+  });
+}
 
 test("get all releases", async ({ request }) => {
   const releasesApiResponse = await request.get(`${baseUrl}/releases`);
