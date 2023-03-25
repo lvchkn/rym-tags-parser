@@ -91,8 +91,8 @@ async function getRYMData(
   const browser = await playwright.chromium.launch({
     headless: true,
     logger: {
-      isEnabled: (name, severity) => name === "browser",
-      log: (name, severity, message, args) => console.log(`${name} ${message}`),
+      isEnabled: (name) => name === "browser",
+      log: (name, message) => console.log(`${name} ${message}`),
     },
   });
 

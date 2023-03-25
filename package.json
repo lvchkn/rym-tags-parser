@@ -6,10 +6,10 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "tsc && NODE_ENV=development node dist/server.js",
-    "local": "NODE_ENV=development ts-node dist/server.js",
+    "start": "tsc && NODE_ENV=development node -r dotenv-flow/config dist/server.js",
+    "local": "NODE_ENV=development ts-node -r dotenv-flow/config dist/server.js",
     "local:watch": "nodemon src -e ts,json --exec 'npm run local'",
-    "test": "NODE_ENV=test npx playwright test --config=tests/playwright.config.ts",
+    "test": "NODE_ENV=test npx playwright test --config=tests/playwright.config.ts --debug",
     "lint": "npm run eslint",
     "eslint": "npx eslint ."
   },
