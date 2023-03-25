@@ -1,6 +1,11 @@
 import express, { Router, Request, Response } from "express";
 import { query, validationResult } from "express-validator";
-import { getAllReleases } from "../db/releasesReadRepo.js";
+import {
+  getAllAlbums,
+  getAllArtists,
+  getAllGenres,
+  getAllReleases,
+} from "../db/releasesReadRepo.js";
 
 const releasesRouter: Router = express.Router();
 
@@ -25,6 +30,12 @@ releasesRouter.get(
 
   getAll
 );
+
+releasesRouter.get("/artists", getArtists);
+
+releasesRouter.get("/albums", getAlbums);
+
+releasesRouter.get("/genres", getGenres);
 
 export interface FilterOptions {
   artists?: string[];
@@ -68,6 +79,36 @@ async function getAll(req: Request, res: Response) {
   } catch (error) {
     return res.status(500).json(error);
   }
+}
+
+async function getArtists(req: Request, res: Response) {
+  const artists = await getAllArtists();
+
+  if (artists.length === 0) {
+    return res.status(404).send();
+  }
+
+  return res.status(200).json(artists);
+}
+
+async function getAlbums(req: Request, res: Response) {
+  const albums = await getAllAlbums();
+
+  if (albums.length === 0) {
+    return res.status(404).send();
+  }
+
+  return res.status(200).json(albums);
+}
+
+async function getGenres(req: Request, res: Response) {
+  const genres = await getAllGenres();
+
+  if (genres.length === 0) {
+    return res.status(404).send();
+  }
+
+  return res.status(200).json(genres);
 }
 
 export { releasesRouter };

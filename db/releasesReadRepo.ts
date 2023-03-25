@@ -50,50 +50,36 @@ export async function getAllReleases(
   return releases;
 }
 
-export async function getReleaseByAlbumName(
-  album: string
-): Promise<WithId<Release>> {
-  const release = await db
-    .collection<Release>(releasesCollectionName)
-    .findOne({ album });
-
-  if (release) return release;
-
-  throw "Album with this name is not found";
-}
-
-export async function getAllReleasesInGenre(
-  genre: string
-): Promise<WithId<Release>[]> {
+export async function getAllArtists(): Promise<string[]> {
   const releasesCursor = db
     .collection<Release>(releasesCollectionName)
-    .find({ genres: { $in: [genre] } });
+    .find()
+    .project({ _id: 0, artist: 1 });
 
-  const releases = releasesCursor.toArray();
+  const releases = await releasesCursor.toArray();
+  const artists: string[] = releases.map((release) => release.artist);
 
-  return releases;
+  return artists;
 }
 
-export async function getAllReleasesInYear(
-  year: number
-): Promise<WithId<Release>[]> {
+export async function getAllAlbums(): Promise<string[]> {
   const releasesCursor = db
     .collection<Release>(releasesCollectionName)
-    .find({ year });
+    .find()
+    .project({ _id: 0, album: 1 });
 
-  const releases = releasesCursor.toArray();
+  const releases = await releasesCursor.toArray();
+  const albums: string[] = releases.map((release) => release.album);
 
-  return releases;
+  return albums;
 }
 
-export async function getAllAlbumsByArtist(
-  artist: string
-): Promise<WithId<Release>[]> {
+export async function getAllGenres(): Promise<string[]> {
   const releasesCursor = db
     .collection<Release>(releasesCollectionName)
-    .find({ artist });
+    .distinct("genres");
 
-  const releases = releasesCursor.toArray();
+  const genres = await releasesCursor;
 
-  return releases;
+  return genres;
 }
