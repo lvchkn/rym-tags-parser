@@ -12,11 +12,11 @@ export async function startConsumer(): Promise<void> {
     await connection.close();
   });
 
-  const exchangeName = "parse-tasks-exchange";
-  await channel.assertExchange(exchangeName, "direct", { durable: false });
+  const { queue } = await channel.assertQueue("parse-tasks-queue", {
+    durable: true,
+  });
 
-  const { queue } = await channel.assertQueue("parse-tasks-queue");
-  await channel.bindQueue(queue, exchangeName, "parse-tasks-key");
+  await channel.prefetch(2);
 
   await channel.consume(
     queue,
