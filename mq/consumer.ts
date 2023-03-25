@@ -18,29 +18,34 @@ export async function startConsumer(): Promise<void> {
   const { queue } = await channel.assertQueue("parse-tasks-queue");
   await channel.bindQueue(queue, exchangeName, "parse-tasks-key");
 
-  await channel.consume(queue, async (message: ConsumeMessage | null) => {
-    if (message !== null) {
-      const json = message.content.toString();
-      console.log("Message received!");
+  await channel.consume(
+    queue,
+    async (message: ConsumeMessage | null) => {
+      if (message !== null) {
+        const json = message.content.toString();
+        console.log("Message received!");
 
-      const parseRequest = JSON.parse(json);
-      const result = await parseAndSave(parseRequest);
+        const parseRequest = JSON.parse(json);
+        const result = await parseAndSave(parseRequest);
 
-      console.log(JSON.stringify(result));
-      channel.ack(message);
+        console.log(JSON.stringify(result));
 
-      const task: Task = {
-        id: message.properties.messageId,
-        status: "Completed",
-      };
+        const task: Task = {
+          id: message.properties.messageId,
+          status: "Completed",
+        };
 
-      const upsertTaskResult = await upsertTask(task);
-      console.log(
-        "upsertTaskResult completed:",
-        JSON.stringify(upsertTaskResult)
-      );
-    } else {
-      console.log("Error while receiving the message");
-    }
-  });
+        const upsertTaskResult = await upsertTask(task);
+        console.log(
+          "upsertTaskResult completed:",
+          JSON.stringify(upsertTaskResult)
+        );
+
+        channel.ack(message);
+      } else {
+        console.log("Error while receiving the message");
+      }
+    },
+    { noAck: false }
+  );
 }
