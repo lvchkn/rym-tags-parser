@@ -1,4 +1,8 @@
-import { AnyBulkWriteOperation, BulkWriteResult } from "mongodb";
+import {
+  AnyBulkWriteOperation,
+  BulkWriteResult,
+  MongoBulkWriteError,
+} from "mongodb";
 import { Release } from "../parser.js";
 import { getClient } from "./mongo.js";
 
@@ -46,13 +50,13 @@ export async function addNewReleases(releases: Release[]): Promise<AddResult> {
       insertedCount: result.insertedCount,
       upsertedCount: result.upsertedCount,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(error);
 
     return {
       ack: false,
-      insertedCount: error?.result?.result?.insertedCount,
-      upsertedCount: error?.result?.result?.upsertedCount,
+      insertedCount: (<MongoBulkWriteError>error).result.insertedCount,
+      upsertedCount: (<MongoBulkWriteError>error).result.upsertedCount,
     };
   }
 }

@@ -4,7 +4,8 @@ import { runServer, stopServer } from "../server.js";
 let baseUrl: string;
 
 test.beforeAll(async () => {
-  baseUrl = `http://localhost:${Number(await runServer())}`;
+  const testServerPort = Number(await runServer());
+  baseUrl = `http://localhost:${testServerPort}`;
 });
 
 test("run new parse task, then check task's status, then get all parsed releases", async ({
@@ -41,7 +42,7 @@ test("run new parse task, then check task's status, then get all parsed releases
     expect(json.status).toBe("Completed");
   }).toPass({
     intervals: [5_000],
-    timeout: 90_000,
+    timeout: 30_000,
   });
 
   const releases = await request.get(`${baseUrl}/releases`);

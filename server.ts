@@ -2,8 +2,6 @@ import express, { Express } from "express";
 import morgan from "morgan";
 import { AddressInfo } from "net";
 import { IncomingMessage, Server, ServerResponse } from "http";
-import * as dotenv from "dotenv-flow";
-dotenv.config();
 import { connectToMongoDb } from "./db/mongo.js";
 import { startConsumer } from "./mq/consumer.js";
 import { rootRouter } from "./routers/rootRouter.js";
@@ -30,7 +28,7 @@ export async function runServer() {
   await startConsumer();
 
   let currentPort = port;
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     if (process.env.NODE_ENV !== "test") {
       app.listen(port, () => {
         console.log(`Server is listening on port ${port}`);
@@ -49,7 +47,7 @@ export async function runServer() {
 }
 
 export async function stopServer(): Promise<void> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     connection.close(() => {
       resolve();
     });

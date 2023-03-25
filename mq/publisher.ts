@@ -20,15 +20,13 @@ export async function publishMessage(message) {
   const uuid = uuidv4();
 
   try {
-    const exchangeName = "parse-tasks-exchange";
-    await channel.assertExchange(exchangeName, "direct", { durable: false });
+    const queueName = "parse-tasks-queue";
+    await channel.assertQueue(queueName, { durable: true });
 
-    channel.publish(
-      exchangeName,
-      "parse-tasks-key",
-      Buffer.from(JSON.stringify(message)),
-      { messageId: uuid }
-    );
+    channel.sendToQueue(queueName, Buffer.from(JSON.stringify(message)), {
+      messageId: uuid,
+      persistent: true,
+    });
 
     console.log("Message published!");
 
