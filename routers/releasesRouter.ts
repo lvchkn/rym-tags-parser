@@ -6,43 +6,24 @@ import {
   getAllGenres,
   getAllReleases,
 } from "../db/releasesReadRepo.js";
+import { getQuery } from "../services/queryProcessor.js";
 
 const releasesRouter: Router = express.Router();
 
 releasesRouter.get(
   "/",
-  query("artists")
-    .optional({ checkFalsy: true, nullable: true })
-    .trim()
-    .escape(),
-
-  query("albums")
-    .optional({ checkFalsy: true, nullable: true })
-    .trim()
-    .escape(),
-
-  query("genres")
-    .optional({ checkFalsy: true, nullable: true })
-    .trim()
-    .escape(),
-
-  query("years").optional({ checkFalsy: true, nullable: true }),
-
+  [
+    query("artists").trim().escape().optional(),
+    query("albums").trim().escape().optional(),
+    query("genres").trim().escape().optional(),
+    query("years").optional(),
+  ],
   getAll
 );
 
 releasesRouter.get("/artists", getArtists);
-
 releasesRouter.get("/albums", getAlbums);
-
 releasesRouter.get("/genres", getGenres);
-
-export interface FilterOptions {
-  artists?: string[];
-  albums?: string[];
-  genres?: string[];
-  years?: number[];
-}
 
 async function getAll(req: Request, res: Response) {
   const errors = validationResult(req);
@@ -51,25 +32,10 @@ async function getAll(req: Request, res: Response) {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const filterOptions: FilterOptions = {};
+  const query = getQuery(req);
+
   try {
-    if (req.query.genres) {
-      filterOptions.genres = (<string>req.query.genres).split(",");
-    }
-
-    if (req.query.artists) {
-      filterOptions.artists = (<string>req.query.artists).split(",");
-    }
-
-    if (req.query.albums) {
-      filterOptions.albums = (<string>req.query.albums).split(",");
-    }
-
-    if (req.query.years) {
-      filterOptions.years = (<string>req.query.years).split(",").map(Number);
-    }
-
-    const releases = await getAllReleases(filterOptions);
+    const releases = await getAllReleases(query);
 
     if (!releases || releases.length === 0) {
       return res.status(404).send();
@@ -81,7 +47,7 @@ async function getAll(req: Request, res: Response) {
   }
 }
 
-async function getArtists(req: Request, res: Response) {
+async function getArtists(_: Request, res: Response) {
   const artists = await getAllArtists();
 
   if (artists.length === 0) {
@@ -91,7 +57,7 @@ async function getArtists(req: Request, res: Response) {
   return res.status(200).json(artists);
 }
 
-async function getAlbums(req: Request, res: Response) {
+async function getAlbums(_: Request, res: Response) {
   const albums = await getAllAlbums();
 
   if (albums.length === 0) {
@@ -101,7 +67,7 @@ async function getAlbums(req: Request, res: Response) {
   return res.status(200).json(albums);
 }
 
-async function getGenres(req: Request, res: Response) {
+async function getGenres(_: Request, res: Response) {
   const genres = await getAllGenres();
 
   if (genres.length === 0) {
