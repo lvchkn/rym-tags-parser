@@ -3,6 +3,8 @@ import { Release } from "../models/release.js";
 import { ParseRequest } from "../models/parseRequest.js";
 
 const DATA_URL = process.env.DATA_URL || "";
+const TIMEOUT_BETWEEN_PAGES = 5_000;
+const TIMEOUT_BEFORE_CLOSING_BROWSER = 1_000;
 
 async function getReleasesFromPage(page: playwright.Page): Promise<Release[]> {
   const locator = page.locator(".or_q_albumartist");
@@ -60,7 +62,7 @@ async function parseAllPages(
     const chunk: Release[] = await getReleasesFromPage(page);
     releaseChunks.push(chunk);
 
-    await page.waitForTimeout(5_000);
+    await page.waitForTimeout(TIMEOUT_BETWEEN_PAGES);
   } while (hasNextPage && currentPageNumber <= toPage);
 
   const flattenedReleases = releaseChunks.flat();
@@ -84,7 +86,7 @@ async function getRYMData(
   const page = await browser.newPage();
   const releases = await parseAllPages(page, url, fromPage, toPage);
 
-  await page.waitForTimeout(1_000);
+  await page.waitForTimeout(TIMEOUT_BEFORE_CLOSING_BROWSER);
   await browser.close();
 
   return releases;
