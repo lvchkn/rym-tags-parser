@@ -1,6 +1,6 @@
 import express, { Router, Request, Response } from "express";
-import { ParseRequest } from "../parser.js";
 import { publishMessage } from "../mq/publisher.js";
+import { ParseRequest } from "../models/parseRequest.js";
 
 const rootRouter: Router = express.Router();
 

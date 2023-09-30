@@ -1,7 +1,7 @@
 import { Filter, WithId } from "mongodb";
-import { Release } from "../parser.js";
 import { FilterOptions } from "../routers/releasesRouter.js";
 import { getClient } from "./mongo.js";
+import { Release } from "../models/release.js";
 
 const client = getClient();
 const db = client.db("rymdata");
@@ -10,25 +10,25 @@ const releasesCollectionName = "releases";
 function parseFilters(filterOptions: FilterOptions): Filter<Release> {
   const filter: Filter<Release> = {};
 
-  if (filterOptions.artists) {
+  if (filterOptions.artists.length > 0) {
     filter.artist = {
       $in: filterOptions.artists,
     };
   }
 
-  if (filterOptions.albums) {
+  if (filterOptions.albums.length > 0) {
     filter.album = {
       $in: filterOptions.albums,
     };
   }
 
-  if (filterOptions.genres) {
+  if (filterOptions.genres.length > 0) {
     filter.genres = {
       $all: filterOptions.genres,
     };
   }
 
-  if (filterOptions.years) {
+  if (filterOptions.years.length > 0) {
     filter.year = {
       $in: filterOptions.years,
     };
@@ -44,7 +44,11 @@ export async function getAllReleases(
 
   const releasesCursor = db
     .collection<Release>(releasesCollectionName)
-    .find(filters);
+    .find(filters)
+    .collation({
+      locale: "en",
+      strength: 2,
+    });
   const releases = releasesCursor.toArray();
 
   return releases;

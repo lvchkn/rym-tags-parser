@@ -1,14 +1,10 @@
 import { WithId } from "mongodb";
 import { getClient } from "./mongo.js";
+import { Task } from "../models/task.js";
 
 const client = getClient();
 const db = client.db("rymdata");
 const tasksCollectionName = "tasks";
-
-export interface Task {
-  id: string;
-  status: string;
-}
 
 export async function getTask(taskId: string): Promise<WithId<Task>> {
   const task = await db

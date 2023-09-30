@@ -1,9 +1,9 @@
 import test, { expect } from "@playwright/test";
 import { describe } from "node:test";
 import { addNewReleases } from "../db/releasesWriteRepo.js";
-import { Release } from "../parser.js";
 import { runServer, stopServer } from "../server.js";
 import { testReleases } from "../testData.js";
+import { Release } from "../models/release.js";
 
 let baseUrl: string;
 

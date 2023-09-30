@@ -3,8 +3,8 @@ import {
   BulkWriteResult,
   MongoBulkWriteError,
 } from "mongodb";
-import { Release } from "../parser.js";
 import { getClient } from "./mongo.js";
+import { Release } from "../models/release.js";
 
 const client = getClient();
 const db = client.db("rymdata");

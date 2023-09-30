@@ -29,7 +29,7 @@ test("run new parse task, then check task's status, then get all parsed releases
   const parseResultJson = await parseResult.json();
 
   expect(parseResultJson).toMatchObject({
-    status: "pending",
+    status: "Pending",
   });
 
   await expect(async () => {
