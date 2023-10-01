@@ -7,7 +7,7 @@ export interface Query {
   years: number[];
 }
 
-export const getQuery = (request: Request): Query => {
+export function getQuery(request: Request): Query {
   const { artists, albums, genres, years } = request.query;
 
   const processedQuery: Query = {
@@ -25,4 +25,4 @@ export const getQuery = (request: Request): Query => {
   };
 
   return processedQuery;
-};
+}
