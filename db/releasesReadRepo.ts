@@ -1,50 +1,53 @@
 import { Filter, WithId } from "mongodb";
-import { Release } from "../parser.js";
-import { FilterOptions } from "../routers/releasesRouter.js";
 import { getClient } from "./mongo.js";
+import { Release } from "../models/release.js";
+import { Query } from "../services/queryProcessor.js";
 
 const client = getClient();
 const db = client.db("rymdata");
 const releasesCollectionName = "releases";
 
-function parseFilters(filterOptions: FilterOptions): Filter<Release> {
+function parseFilters(query: Query): Filter<Release> {
+  const { artists, albums, genres, years } = query;
   const filter: Filter<Release> = {};
 
-  if (filterOptions.artists) {
+  if (artists.length > 0) {
     filter.artist = {
-      $in: filterOptions.artists,
+      $in: artists,
     };
   }
 
-  if (filterOptions.albums) {
+  if (albums.length > 0) {
     filter.album = {
-      $in: filterOptions.albums,
+      $in: albums,
     };
   }
 
-  if (filterOptions.genres) {
+  if (genres.length > 0) {
     filter.genres = {
-      $all: filterOptions.genres,
+      $all: genres,
     };
   }
 
-  if (filterOptions.years) {
+  if (years.length > 0) {
     filter.year = {
-      $in: filterOptions.years,
+      $in: years,
     };
   }
 
   return filter;
 }
 
-export async function getAllReleases(
-  filterOptions: FilterOptions
-): Promise<WithId<Release>[]> {
-  const filters = parseFilters(filterOptions);
+export async function getAllReleases(query: Query): Promise<WithId<Release>[]> {
+  const filters = parseFilters(query);
 
   const releasesCursor = db
     .collection<Release>(releasesCollectionName)
-    .find(filters);
+    .find(filters)
+    .collation({
+      locale: "en",
+      strength: 2,
+    });
   const releases = releasesCursor.toArray();
 
   return releases;

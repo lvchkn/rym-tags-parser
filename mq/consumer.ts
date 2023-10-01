@@ -1,51 +1,50 @@
-import { ConsumeMessage } from "amqplib";
-import { Task, upsertTask } from "../db/tasksRepo.js";
-import { parseAndSave } from "../parser.js";
+import { Channel, Connection, ConsumeMessage } from "amqplib";
+import { upsertTask } from "../db/tasksRepo.js";
 import { connectToRabbitMq } from "./amqp.js";
+import { save } from "../services/dataSaver.js";
+import { Task } from "../models/task.js";
+
+let channel: Channel;
+let connection: Connection;
+
+process.once("SIGINT", async () => {
+  await channel.close();
+  await connection.close();
+});
 
 export async function startConsumer(): Promise<void> {
-  const connection = await connectToRabbitMq();
-  const channel = await connection.createChannel();
-
-  process.once("SIGINT", async () => {
-    await channel.close();
-    await connection.close();
-  });
+  connection = await connectToRabbitMq();
+  channel = await connection.createChannel();
 
   const { queue } = await channel.assertQueue("parse-tasks-queue", {
     durable: true,
   });
 
   await channel.prefetch(2);
+  await channel.consume(queue, onMessageHandler, { noAck: false });
+}
 
-  await channel.consume(
-    queue,
-    async (message: ConsumeMessage | null) => {
-      if (message !== null) {
-        const json = message.content.toString();
-        console.log("Message received!");
+async function onMessageHandler(message: ConsumeMessage | null): Promise<void> {
+  if (message === null) {
+    console.log("Error while receiving the message");
+    return;
+  }
 
-        const parseRequest = JSON.parse(json);
-        const result = await parseAndSave(parseRequest);
+  const json = message.content.toString();
+  console.log("Message received!");
 
-        console.log(JSON.stringify(result));
+  const parseRequest = JSON.parse(json);
+  const result = await save(parseRequest);
 
-        const task: Task = {
-          id: message.properties.messageId,
-          status: "Completed",
-        };
+  console.log(JSON.stringify(result));
 
-        const upsertTaskResult = await upsertTask(task);
-        console.log(
-          "upsertTaskResult completed:",
-          JSON.stringify(upsertTaskResult)
-        );
+  const task: Task = {
+    id: message.properties.messageId,
+    status: "Completed",
+  };
 
-        channel.ack(message);
-      } else {
-        console.log("Error while receiving the message");
-      }
-    },
-    { noAck: false }
-  );
+  const upsertTaskResult = await upsertTask(task);
+  console.log("upsertTaskResult completed:", JSON.stringify(upsertTaskResult));
+
+  channel.ack(message);
 }

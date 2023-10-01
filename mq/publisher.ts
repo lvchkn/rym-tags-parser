@@ -2,7 +2,8 @@ import { Connection } from "amqplib";
 import { v4 as uuidv4 } from "uuid";
 import { exit } from "process";
 import { connectToRabbitMq } from "./amqp.js";
-import { Task, upsertTask } from "../db/tasksRepo.js";
+import { upsertTask } from "../db/tasksRepo.js";
+import { Task } from "../models/task.js";
 
 let connection: Connection | null = null;
 
@@ -32,7 +33,7 @@ export async function publishMessage(message) {
 
     const task: Task = {
       id: uuid,
-      status: "pending",
+      status: "Pending",
     };
 
     const upsertTaskResult = await upsertTask(task);

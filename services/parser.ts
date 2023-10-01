@@ -1,23 +1,10 @@
 import playwright from "playwright";
-import { addNewReleases, AddResult } from "./db/releasesWriteRepo.js";
-import { testReleases } from "./testData.js";
+import { Release } from "../models/release.js";
+import { ParseRequest } from "../models/parseRequest.js";
 
 const DATA_URL = process.env.DATA_URL || "";
-
-export interface Release {
-  artist: string;
-  album: string;
-  genres: string[];
-  year: number;
-}
-
-export interface ParseRequest {
-  profile: string;
-  tag: string;
-  fromPage: number;
-  toPage: number;
-  isTest?: boolean;
-}
+const TIMEOUT_BETWEEN_PAGES = 5_000;
+const TIMEOUT_BEFORE_CLOSING_BROWSER = 1_000;
 
 async function getReleasesFromPage(page: playwright.Page): Promise<Release[]> {
   const locator = page.locator(".or_q_albumartist");
@@ -54,7 +41,7 @@ async function getReleasesFromPage(page: playwright.Page): Promise<Release[]> {
   return releases;
 }
 
-async function parseAll(
+async function parseAllPages(
   page: playwright.Page,
   url: string,
   fromPage: number,
@@ -75,7 +62,7 @@ async function parseAll(
     const chunk: Release[] = await getReleasesFromPage(page);
     releaseChunks.push(chunk);
 
-    await page.waitForTimeout(5_000);
+    await page.waitForTimeout(TIMEOUT_BETWEEN_PAGES);
   } while (hasNextPage && currentPageNumber <= toPage);
 
   const flattenedReleases = releaseChunks.flat();
@@ -97,28 +84,19 @@ async function getRYMData(
   });
 
   const page = await browser.newPage();
-  const releases = await parseAll(page, url, fromPage, toPage);
+  const releases = await parseAllPages(page, url, fromPage, toPage);
 
-  await page.waitForTimeout(1_000);
+  await page.waitForTimeout(TIMEOUT_BEFORE_CLOSING_BROWSER);
   await browser.close();
 
   return releases;
 }
 
-export async function parseAndSave(
-  parseRequest: ParseRequest
-): Promise<AddResult> {
-  const { profile, tag, fromPage, toPage, isTest } = parseRequest;
-
-  if (isTest) {
-    const result = await addNewReleases(testReleases);
-    return result;
-  }
+export async function parse(parseRequest: ParseRequest): Promise<Release[]> {
+  const { profile, tag, fromPage, toPage } = parseRequest;
 
   const url = `${DATA_URL}/${profile}/stag/${tag}`;
   const releases = await getRYMData(url, fromPage, toPage);
 
-  const result = await addNewReleases(releases);
-
-  return result;
+  return releases;
 }
