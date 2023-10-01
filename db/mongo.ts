@@ -23,8 +23,6 @@ async function createIndexes(): Promise<void> {
   const collectionName = "releases";
   const db = client.db("rymdata");
 
-  const indexes = { artist: 1, album: 1, genres: 1, year: 1 };
-
   const options = {
     collation: {
       locale: "en",
@@ -32,7 +30,10 @@ async function createIndexes(): Promise<void> {
     },
   };
 
-  await db.collection(collectionName).createIndex(indexes, options);
+  await db.collection(collectionName).createIndex({ artist: 1 }, options);
+  await db.collection(collectionName).createIndex({ album: 1 }, options);
+  await db.collection(collectionName).createIndex({ genres: 1 }, options);
+  await db.collection(collectionName).createIndex({ year: 1 }, options);
 }
 
 export function getClient() {
