@@ -1,4 +1,4 @@
-import { Release } from "./models/release";
+import { Release } from "./models/release.js";
 
 export const testReleases: Release[] = [
   {
